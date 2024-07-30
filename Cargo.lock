@@ -4642,6 +4642,7 @@ dependencies = [
  "reth-execution-types",
  "reth-exex",
  "reth-fs-util",
+ "reth-libmdbx",
  "reth-network",
  "reth-network-api",
  "reth-network-p2p",

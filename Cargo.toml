@@ -10,6 +10,7 @@ reth-config = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" 
 reth-primitives = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-fs-util = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-db = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3", features = ["mdbx"] }
+reth-libmdbx = {  git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3", default-features = false, features = ["return-borrowed"] }
 reth-db-api = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-exex = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-provider = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
