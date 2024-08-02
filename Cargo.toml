@@ -10,7 +10,7 @@ reth-config = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" 
 reth-primitives = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-fs-util = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-db = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3", features = ["mdbx"] }
-reth-libmdbx = {  git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3", default-features = false, features = ["return-borrowed"] }
+reth-libmdbx = {  git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3", features = ["return-borrowed", "read-tx-timeouts"] }
 reth-db-api = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-exex = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
 reth-provider = { git = "https://github.com/paradigmxyz/reth.git", tag = "v1.0.3" }
@@ -146,6 +146,22 @@ optimism = [
 
 # no-op feature flag for switching between the `optimism` and default functionality in CI matrices
 ethereum = []
+
+
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+debug = "line-tables-only"
+strip = true
+panic = "unwind"
+codegen-units = 16
+
+[profile.maxperf]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+
 
 [[bin]]
 name = "pevm"
