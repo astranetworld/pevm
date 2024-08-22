@@ -84,9 +84,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgements
 
 - Thanks to the authors of the `reth` crates for providing essential blockchain components.
-- Thanks to the Rust community for their invaluable support and resources.
-
-
+- We are deeply grateful to the Rust community for their invaluable support and resources.
 
 
 
