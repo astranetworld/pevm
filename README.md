@@ -53,13 +53,13 @@ cargo run --release -- -b 1000 -e 2000 -s 50
 
 The core functionality is implemented in the `EvmCommand` struct. The `execute` method performs the following steps:
 
-- Initializes the environment and consensus.
+- Sets up the environment and consensus mechanism.
 - Configures the blockchain tree and provider.
-- Validates the block range.
-- Creates a task queue and divides the block range into tasks.
-- Spawns multiple threads to process the tasks concurrently.
-- Monitors and logs the execution progress in real-time.
-- Joins the threads and handles any errors that occur during execution.
+- Validates the specified block range.
+- Creates a task queue and splits the block range into individual tasks.
+- Launches multiple threads to process these tasks concurrently.
+- Monitors and logs execution progress in real time.
+- Waits for threads to complete and manages any errors that arise during execution.
 
 ### Task Execution
 
