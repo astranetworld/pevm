@@ -4,10 +4,10 @@ This project implements an Ethereum Virtual Machine (EVM) command executor, leve
 
 ## Features
 
-- Executes EVM commands over a specified range of blocks.
-- Utilizes a multi-threaded approach to improve execution speed.
-- Supports dynamic task allocation and load balancing across threads.
-- Provides real-time execution progress monitoring.
+- Executes EVM commands within a defined block range.
+- Employs a multi-threaded approach to enhance execution speed.
+- Supports dynamic task distribution and load balancing across threads.
+- Offers real-time monitoring of execution progress.
 
 ## Dependencies
 
