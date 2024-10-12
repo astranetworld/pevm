@@ -8,23 +8,27 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 use reth_blockchain_tree::{BlockchainTree, BlockchainTreeConfig, ShareableBlockchainTree, TreeExternals};
+use reth_chainspec::ChainSpec;
+use reth_cli::chainspec::ChainSpecParser;
 use reth_cli_commands::common::{AccessRights, Environment, EnvironmentArgs};
+use reth_cli_runner::CliContext;
 use reth_consensus::Consensus;
 use reth_evm::execute::{BatchExecutor, BlockExecutorProvider};
+use reth_evm_ethereum::execute::EthExecutorProvider;
+use reth_node_types::NodeTypesWithEngine;
 use reth_primitives::constants::gas_units::format_gas_throughput;
 use reth_provider::{BlockReader, ChainSpecProvider, HeaderProvider};
 use reth_provider::providers::BlockchainProvider;
 use reth_prune::PruneModes;
 use reth_revm::database::StateProviderDatabase;
 use crate::beacon_consensus::EthBeaconConsensus;
-use crate::macros::block_executor;
 use crate::providers::{BlockNumReader, ProviderError, StateProviderFactory};
 
 /// EVM commands
 #[derive(Debug, Parser)]
-pub struct EvmCommand {
+pub struct EvmCommand<C: ChainSpecParser> {
     #[command(flatten)]
-    env: EnvironmentArgs,
+    env: EnvironmentArgs<C>,
     /// begin block number
     #[arg(long, alias = "begin", short = 'b')]
     begin_number: u64,
@@ -41,22 +45,25 @@ struct Task {
     end: u64,
 }
 
-impl EvmCommand {
+impl<C: ChainSpecParser<ChainSpec = ChainSpec>> EvmCommand<C> {
     /// Execute the `evm` command
-    pub async fn execute(self) -> Result<()> {
+    pub async fn execute<N: NodeTypesWithEngine<ChainSpec = C::ChainSpec>>(
+        self,
+        _: CliContext,
+    )  -> Result<()> {
         info!(target: "reth::cli", "Executing EVM command...");
 
-        let Environment { provider_factory, .. } = self.env.init(AccessRights::RO)?;
+        let Environment { provider_factory, .. } = self.env.init::<N>(AccessRights::RO)?;
 
         let consensus: Arc<dyn Consensus> =
             Arc::new(EthBeaconConsensus::new(provider_factory.chain_spec()));
 
-        let executor = block_executor!(provider_factory.chain_spec());
+        let executor = EthExecutorProvider::ethereum(provider_factory.chain_spec());
 
         // configure blockchain tree
         let tree_externals =
             TreeExternals::new(provider_factory.clone(), consensus, executor);
-        let tree = BlockchainTree::new(tree_externals, BlockchainTreeConfig::default(), PruneModes::none())?;
+        let tree = BlockchainTree::new(tree_externals, BlockchainTreeConfig::default())?;
         let blockchain_tree = Arc::new(ShareableBlockchainTree::new(tree));
         let blockchain_db = BlockchainProvider::new(provider_factory.clone(), blockchain_tree)?;
 
@@ -175,7 +182,7 @@ impl EvmCommand {
                                 .ok_or_else(|| ProviderError::HeaderNotFound(task.start.into()))?;
 
                             let db = StateProviderDatabase::new(blockchain_db.history_by_block_number(task.start - 1)?);
-                            let executor = block_executor!(provider_factory.chain_spec());
+                            let executor = EthExecutorProvider::ethereum(provider_factory.chain_spec());
                             let mut executor = executor.batch_executor(db);
                             let blocks = blockchain_db.block_with_senders_range(task.start..=task.end).unwrap();
 
@@ -188,8 +195,8 @@ impl EvmCommand {
                                     let result = (block, td).into();
                                     td += block.header.difficulty;
                                     step_cumulative_gas += block.block.gas_used;
-                                    step_txs_counter += block.block.body.len();
-                                    debug!(target: "exex::evm", block_number = block.block.header.number, txs_count = block.block.body.len(), thread_id = ?thread_id, "Adding transactions count");
+                                    step_txs_counter += block.block.body.transactions.len();
+                                    debug!(target: "exex::evm", block_number = block.block.header.number, txs_count = block.block.body.transactions.len(), thread_id = ?thread_id, "Adding transactions count");
                                     result
                                 })
                                 .collect::<Vec<_>>())?;
